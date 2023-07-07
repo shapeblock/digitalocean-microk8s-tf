@@ -67,13 +67,21 @@ data "digitalocean_droplets" "vms" {
   }
 }
 
-resource "local_file" "inventory" {
-  content = templatefile("${path.module}/hosts.tpl", {
+locals {
+  inventory = templatefile("${path.module}/hosts.tpl", {
     ha_host     = data.digitalocean_droplets.vms[var.node_group_config.0.name].droplets.0.name
     ha_ip       = data.digitalocean_droplets.vms[var.node_group_config.0.name].droplets.0.ipv4_address
     node_groups = var.node_group_config
     vms         = data.digitalocean_droplets.vms
-    }
-  )
+  })
+}
+
+resource "local_file" "inventory" {
+  content  = local.inventory
   filename = "${path.module}/inventory"
+}
+
+resource "local_file" "data" {
+  content  = jsonencode({ private = tls_private_key.ssh_key.private_key_pem, public = tls_private_key.ssh_key.public_key_pem, inventory = local.inventory })
+  filename = "${path.module}/data"
 }
