@@ -10,7 +10,7 @@ variable "vpc" {
 
 variable "image" {
   type        = string
-  default     = "ubuntu-18-04-x64"
+  default     = "ubuntu-22-04-x64"
   description = "Base image for the VMs"
 }
 
@@ -22,3 +22,6 @@ variable "node_group_config" {
   }))
   description = "Node group configuration for VM deployment"
 }
+
+// TODO: Set Kubernetes version
+// TODO: Add cluster name and ID for tagging purposes

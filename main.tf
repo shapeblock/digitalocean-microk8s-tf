@@ -10,6 +10,18 @@ terraform {
   }
 }
 
+locals {
+  vms = flatten([
+    for node_group in var.node_group_config : [
+      for i in range(node_group.count) : {
+        name  = "${node_group.name}-${i}"
+        size  = node_group.size
+        group = node_group.name
+      }
+    ]
+  ])
+}
+
 resource "random_id" "ssh_key_id" {
   byte_length = 8
 }
@@ -18,23 +30,50 @@ resource "tls_private_key" "ssh_key" {
   algorithm = "RSA"
 }
 
+// TODO: change naming convention
 resource "digitalocean_ssh_key" "ssh_key" {
   name       = "terraform-ssh-key-${random_id.ssh_key_id.hex}"
   public_key = tls_private_key.ssh_key.public_key_openssh
 }
 
+// TODO: Add tags to all resources
 resource "digitalocean_vpc" "vpc" {
   name   = var.vpc
   region = var.region
 }
 
 resource "digitalocean_droplet" "vm" {
-  count      = length(var.node_group_config)
-  name       = "${var.node_group_config[count.index].name}-${count.index}"
+  for_each = {
+    for vm in local.vms : vm.name => vm
+  }
+  name       = each.value.name
   region     = digitalocean_vpc.vpc.region
-  size       = var.node_group_config[count.index].size
+  size       = each.value.size
   image      = var.image
   vpc_uuid   = digitalocean_vpc.vpc.id
   ssh_keys   = [digitalocean_ssh_key.ssh_key.id]
+  tags       = ["shapeblock", each.value.group]
   monitoring = true # Enable monitoring if desired
+}
+
+data "digitalocean_droplets" "vms" {
+  for_each = {
+    for node_group in var.node_group_config : node_group.name => node_group
+  }
+  filter {
+    key    = "tags"
+    values = ["shapeblock", each.key]
+    all    = true
+  }
+}
+
+resource "local_file" "inventory" {
+  content = templatefile("${path.module}/hosts.tpl", {
+    ha_host     = data.digitalocean_droplets.vms[var.node_group_config.0.name].droplets.0.name
+    ha_ip       = data.digitalocean_droplets.vms[var.node_group_config.0.name].droplets.0.ipv4_address
+    node_groups = var.node_group_config
+    vms         = data.digitalocean_droplets.vms
+    }
+  )
+  filename = "${path.module}/inventory"
 }
