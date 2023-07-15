@@ -65,12 +65,13 @@ data "digitalocean_droplets" "vms" {
     values = ["shapeblock", each.key]
     all    = true
   }
+  depends_on = [digitalocean_droplet.vm]
 }
 
 locals {
   inventory = templatefile("${path.module}/hosts.tpl", {
-    ha_host     = data.digitalocean_droplets.vms[var.node_group_config.0.name].droplets.0.name
-    ha_ip       = data.digitalocean_droplets.vms[var.node_group_config.0.name].droplets.0.ipv4_address
+    ha_host     = lookup(data.digitalocean_droplets.vms, var.node_group_config.0.name).droplets.0.name
+    ha_ip       = lookup(data.digitalocean_droplets.vms, var.node_group_config.0.name).droplets.0.ipv4_address
     node_groups = var.node_group_config
     vms         = data.digitalocean_droplets.vms
   })
@@ -82,6 +83,6 @@ resource "local_file" "inventory" {
 }
 
 resource "local_file" "data" {
-  content  = jsonencode({ private = tls_private_key.ssh_key.private_key_pem, public = tls_private_key.ssh_key.public_key_pem, inventory = local.inventory })
+  content  = jsonencode({ private = tls_private_key.ssh_key.private_key_pem, public = tls_private_key.ssh_key.public_key_pem, inventory = local.inventory, ingress_ip = lookup(data.digitalocean_droplets.vms, var.node_group_config.0.name).droplets.0.ipv4_address })
   filename = "${path.module}/data"
 }

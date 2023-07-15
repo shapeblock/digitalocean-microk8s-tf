@@ -8,5 +8,5 @@ output "private_key" {
 }
 
 output "ha_ip" {
-  value = data.digitalocean_droplets.vms[var.node_group_config.0.name].droplets.0.ipv4_address
+  value = lookup(data.digitalocean_droplets.vms, var.node_group_config.0.name).droplets.0.ipv4_address
 }
