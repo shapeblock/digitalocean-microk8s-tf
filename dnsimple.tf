@@ -1,9 +1,3 @@
-provider "dnsimple" {
-  token = "TLK9gsTiCT2LuDTwABaiDXzUuA2BTgls"
-  account = "88397"
-}
-
-
 resource "dnsimple_zone_record" "ingress" {
   zone_name = "shapeblock.xyz"
   name   = var.dns
