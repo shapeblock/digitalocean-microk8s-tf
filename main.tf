@@ -4,6 +4,10 @@ terraform {
       source  = "digitalocean/digitalocean"
       version = "2.8.0"
     }
+    dnsimple = {
+      source = "dnsimple/dnsimple"
+      version = "1.1.2"
+    }    
   }
 
   backend "pg" {
@@ -83,6 +87,6 @@ resource "local_file" "inventory" {
 }
 
 resource "local_file" "data" {
-  content  = jsonencode({ private = tls_private_key.ssh_key.private_key_pem, public = tls_private_key.ssh_key.public_key_pem, inventory = local.inventory, ingress_ip = lookup(data.digitalocean_droplets.vms, var.node_group_config.0.name).droplets.0.ipv4_address })
+  content  = jsonencode({ private = tls_private_key.ssh_key.private_key_pem, public = tls_private_key.ssh_key.public_key_pem, inventory = local.inventory })
   filename = "${path.module}/data"
 }
