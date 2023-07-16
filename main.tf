@@ -5,9 +5,9 @@ terraform {
       version = "2.8.0"
     }
     dnsimple = {
-      source = "dnsimple/dnsimple"
+      source  = "dnsimple/dnsimple"
       version = "1.1.2"
-    }    
+    }
   }
 
   backend "pg" {
