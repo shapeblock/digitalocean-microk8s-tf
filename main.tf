@@ -41,20 +41,14 @@ resource "digitalocean_ssh_key" "ssh_key" {
 }
 
 // TODO: Add tags to all resources
-resource "digitalocean_vpc" "vpc" {
-  name   = var.vpc
-  region = var.region
-}
-
 resource "digitalocean_droplet" "vm" {
   for_each = {
     for vm in local.vms : vm.name => vm
   }
   name       = each.value.name
-  region     = digitalocean_vpc.vpc.region
+  region     = var.region
   size       = each.value.size
   image      = var.image
-  vpc_uuid   = digitalocean_vpc.vpc.id
   ssh_keys   = [digitalocean_ssh_key.ssh_key.id]
   tags       = ["shapeblock", each.value.group]
   monitoring = true # Enable monitoring if desired
