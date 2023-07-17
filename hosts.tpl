@@ -4,7 +4,6 @@ ${ha_host} ansible_ssh_host=${ha_ip}
 
 [microk8s_WORKERS]
 %{ for node_group,info in vms ~}
-[${node_group}]
 %{ for droplet in info.droplets ~}
 %{ if droplet.name != ha_host ~}
 ${droplet.name} ansible_ssh_host=${droplet.ipv4_address}
@@ -12,11 +11,6 @@ ${droplet.name} ansible_ssh_host=${droplet.ipv4_address}
 %{ endfor ~}
 %{ endfor ~}
 
-
-[microk8s_WORKERS:children]
-%{ for node_group,info in vms ~}
-[${node_group}]
-%{ endfor ~}
 
 [all:vars]
 ansible_ssh_user=root
