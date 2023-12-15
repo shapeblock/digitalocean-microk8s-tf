@@ -4,10 +4,6 @@ variable "region" {
 }
 
 
-variable "vpc" {
-  type = string
-}
-
 variable "dns" {
   type = string
 }

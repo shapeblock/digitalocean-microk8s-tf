@@ -2,11 +2,11 @@ terraform {
   required_providers {
     digitalocean = {
       source  = "digitalocean/digitalocean"
-      version = "2.8.0"
+      version = "2.34.0"
     }
     dnsimple = {
       source  = "dnsimple/dnsimple"
-      version = "1.1.2"
+      version = "1.3.1"
     }
   }
 
