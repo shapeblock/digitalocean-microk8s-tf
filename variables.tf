@@ -23,5 +23,10 @@ variable "node_group_config" {
   description = "Node group configuration for VM deployment"
 }
 
+variable "tld" {
+  type    = string
+  default = "shapeblockapp.com"
+}
+
 // TODO: Set Kubernetes version
 // TODO: Add cluster name and ID for tagging purposes
