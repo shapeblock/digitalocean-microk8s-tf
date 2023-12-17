@@ -19,6 +19,7 @@ variable "node_group_config" {
     name  = string
     size  = string
     count = number
+    id    = string
   }))
   description = "Node group configuration for VM deployment"
 }

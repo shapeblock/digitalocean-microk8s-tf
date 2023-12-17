@@ -18,9 +18,9 @@ locals {
   vms = flatten([
     for node_group in var.node_group_config : [
       for i in range(node_group.count) : {
-        name  = "${node_group.name}-${i}"
-        size  = node_group.size
-        group = node_group.name
+        name = "${node_group.name}"
+        size = node_group.size
+        id   = node_group.id
       }
     ]
   ])
@@ -56,7 +56,7 @@ resource "digitalocean_droplet" "vm" {
   size       = each.value.size
   image      = var.image
   ssh_keys   = [digitalocean_ssh_key.ssh_key.id]
-  tags       = ["shapeblock", each.value.group]
+  tags       = ["shapeblock", each.value.name, each.value.id]
   monitoring = true # Enable monitoring if desired
 }
 
@@ -95,4 +95,16 @@ resource "local_file" "inventory" {
 resource "local_file" "data" {
   content  = jsonencode({ private = tls_private_key.ssh_key.private_key_pem, public = tls_private_key.ssh_key.public_key_pem, inventory = local.inventory })
   filename = "${path.module}/data"
+}
+
+locals {
+  vm_info = {
+    for vm in digitalocean_droplet.vm :
+    vm.name => vm.ipv4_address
+  }
+}
+
+resource "local_file" "vms" {
+  content  = jsonencode(local.vm_info)
+  filename = "${path.module}/vms"
 }
