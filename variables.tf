@@ -36,5 +36,8 @@ variable "cluster_uuid" {
   type = string
 }
 
+variable "email" {
+  type = string
+}
 // TODO: Set Kubernetes version
 // TODO: Add cluster name and ID for tagging purposes
