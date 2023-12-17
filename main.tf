@@ -34,6 +34,12 @@ resource "tls_private_key" "ssh_key" {
   algorithm = "RSA"
 }
 
+resource "random_password" "registry_password" {
+  length  = 30
+  upper   = false
+  special = false
+}
+
 // TODO: change naming convention
 resource "digitalocean_ssh_key" "ssh_key" {
   name       = "terraform-ssh-key-${random_id.ssh_key_id.hex}"
@@ -68,10 +74,16 @@ data "digitalocean_droplets" "vms" {
 
 locals {
   inventory = templatefile("${path.module}/hosts.tpl", {
-    ha_host     = lookup(data.digitalocean_droplets.vms, var.node_group_config.0.name).droplets.0.name
-    ha_ip       = lookup(data.digitalocean_droplets.vms, var.node_group_config.0.name).droplets.0.ipv4_address
-    node_groups = var.node_group_config
-    vms         = data.digitalocean_droplets.vms
+    ha_host      = lookup(data.digitalocean_droplets.vms, var.node_group_config.0.name).droplets.0.name
+    ha_ip        = lookup(data.digitalocean_droplets.vms, var.node_group_config.0.name).droplets.0.ipv4_address
+    node_groups  = var.node_group_config
+    vms          = data.digitalocean_droplets.vms
+    email        = var.email
+    dns          = var.dns
+    tld          = var.tld
+    sb_url       = var.sb_url
+    cluster_uuid = var.cluster_uuid
+    password     = random_password.registry_password.result
   })
 }
 

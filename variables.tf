@@ -28,5 +28,13 @@ variable "tld" {
   default = "shapeblockapp.com"
 }
 
+variable "sb_url" {
+  type = string
+}
+
+variable "cluster_uuid" {
+  type = string
+}
+
 // TODO: Set Kubernetes version
 // TODO: Add cluster name and ID for tagging purposes
